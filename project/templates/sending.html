@@ -83,8 +83,8 @@
             <input type="search" id="search" name="search" enterkeyhint="search" value="*">
             <button type="button" id="searchBtn">Search!</button>
             <button type="button" id="allBtn">Show all</button>
-            <label for="sender">To:</label>
-            <input type="text" id="sender" name="sender" value="Alice">
+            <label for="recipient">To:</label>
+            <input type="text" id="recipient" name="recipient" value="Alice">
             <button type="button" id="sendBtn">Send</button>
             <span></span>
             <label for="message">Message:</label>
@@ -96,7 +96,7 @@
     var reqId = 0;
     var anchor = document.getElementById('anchor');
     var searchField = document.getElementById('search');
-    var senderField = document.getElementById('sender');
+    var recipientField = document.getElementById('recipient');
     var messageField = document.getElementById('message');
     var searchBtn = document.getElementById('searchBtn');
     var sendBtn = document.getElementById('sendBtn');
@@ -120,11 +120,11 @@
         anchor.scrollIntoView();
 
     };
-    var send = async (sender, message) => {
-        console.log(sender)
+    var send = async (recipient, message) => {
+        console.log(recipient)
         console.log(message)
         const id = reqId++;
-        const q = `/new?sender=${encodeURIComponent(sender)}&message=${encodeURIComponent(message)}`;
+        const q = `/new?recipient=${encodeURIComponent(recipient)}&message=${encodeURIComponent(message)}`;
         res = await fetch(q, { method: 'post' });
         console.log(res);
         const head = document.createElement('h3');
@@ -145,7 +145,7 @@
     });
     searchBtn.addEventListener('click', () => search(searchField.value));
     allBtn.addEventListener('click', () => search('*'));
-    sendBtn.addEventListener('click', () => send(senderField.value, messageField.value));
+    sendBtn.addEventListener('click', () => send(recipientField.value, messageField.value));
 
 </script>
 {% endblock %}

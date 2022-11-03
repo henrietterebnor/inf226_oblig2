@@ -1,6 +1,8 @@
+import flask
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from .messaging import send, search
+from sqlalchemy.sql import func
 from . import db
 
 # Run this in terminal
@@ -9,6 +11,9 @@ from . import db
 # export FLASK_APP=project
 
 main = Blueprint('main', __name__)
+resp = flask.Response()
+resp.headers['Content-Security-Policy'] = "default-src 'self'"
+
 
 @main.route('/')
 def index():
@@ -30,8 +35,9 @@ def messaging():
 @login_required
 def search_message():
     query = request.args.get('q') or request.form.get('q') or '*'
-    stmt = f"SELECT * FROM Messages WHERE message GLOB '{query}'"
-    result = search(stmt)
+    sql = ("SELECT message, sender FROM messages WHERE sender = '%s' AND recipient = '%s'", (query, current_user.username))
+    #tuplee = (query, current_user.username)
+    result = search(sql)
     return result
 
 
@@ -39,7 +45,7 @@ def search_message():
 @login_required
 def search_single_message():
     query = request.args.get('q') or request.form.get('q') or '*'
-    stmt = f"SELECT message FROM Messages WHERE id ='{query}'"
+    stmt = f"SELECT message FROM messages WHERE id ='{query}'"
     result = search(stmt)
     return result
 
@@ -47,8 +53,10 @@ def search_single_message():
 @main.route('/new', methods=['POST', 'GET'])
 @login_required
 def send_message():
-    sender = request.args.get('sender') or request.form.get('sender')
+    sender = current_user.username
     message = request.args.get('message') or request.args.get('message')
-    query = send(sender, message)
+    recipient = request.args.get('recipient') or request.form.get('recipient')
+    time = func.now()
+    query = send(sender, message, recipient, time)
     return query
 

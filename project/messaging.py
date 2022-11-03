@@ -11,13 +11,15 @@ import apsw
 from apsw import Error
 from json import dumps, loads
 from markupsafe import escape
-from project.models import Messages
+from project.models import Messages, User
 from . import db
+from sqlalchemy import create_engine, select
+engine = create_engine("sqlite:///instance/db.sqlite", echo=True, connect_args={'check_same_thread':False})
 
 messaging = Blueprint('messaging', __name__)
 tls = local()
-inject = "'; insert into messages (sender,message) values ('foo', 'bar');select '"
-conn = apsw.Connection('instance/db.sqlite')
+#conn = apsw.Connection('instance/db.sqlite')
+conn = engine.connect()
 
 def pygmentize(text):
     if not hasattr(tls, 'formatter'):
@@ -32,10 +34,10 @@ def pygmentize(text):
 
 
 @messaging.get('/search')
-def search(stmt):
-    result = f"Query: {pygmentize(stmt)}\n"
+def search(sql):
+    result = sql
     try:
-        c = conn.execute(stmt)
+        c = conn.execute(sql)
         rows = c.fetchall()
         result = result + 'Result:\n'
         for row in rows:
@@ -45,15 +47,20 @@ def search(stmt):
     except Error as e:
         return (f'{result}ERROR: {e}', 500)
 
+#B';  DROP TABLE messages; --
 def send(username, message, recipient, time):
     try:
-        if not username or not message or not recipient or not time:
+        if not username or not message:
             return f'ERROR: missing sender or message'
+        exists = db.session.query(User.username).filter_by(username=recipient).scalar() is not None
+        if not exists:
+            return f'ERROR: {recipient} user does not exist!'
         newMessage = Messages(sender=username, recipient = recipient, message=message);
         #stmt = ('INSERT INTO messages (sender, message) VALUES (?,?)',(sender, message))
-       # ('INSERT INTO messages (sender, message, recipient, time) VALUES (?,?,?,?)',
+        # ('INSERT INTO messages (sender, message, recipient, time) VALUES (?,?,?,?)',
         # (username, message, person, date_now))
-        stmt = f"INSERT INTO messages (sender, recipient, message, time) values ('{username}', '{message}')";
+        stmt = f"INSERT INTO messages (sender, recipient, message, time) values ('{username}','{recipient}' '{message}', '{time}')";
+
         result = f"Query: {pygmentize(stmt)}\n"
         db.session.add(newMessage)
         db.session.commit()

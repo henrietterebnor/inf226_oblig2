@@ -9,8 +9,8 @@ db = SQLAlchemy()
 def create_app():
     app = Flask(__name__)
 
-    #TODO make secret key very secret
-    app.config['SECRET_KEY'] = 'secret-key-goes-here'
+    #made with import os, os.urandom(24)
+    app.config['SECRET_KEY'] = b'\x8d\x07Q\x06\x8a8\x9f\x0c"\xc4\xca`\xc9\xe0\xec\xe3\x92v"4c\xa0,/'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 
     db.init_app(app)
