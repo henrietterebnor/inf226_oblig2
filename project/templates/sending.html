@@ -104,7 +104,9 @@
     var allBtn = document.getElementById('allBtn');
     var output = document.getElementById('output');
     var header = document.getElementById('header');
-    var csrf_token = "{{ csrf_token() }}";
+    var csrf_token = document.querySelector("[name='csrf-token']").content
+
+
 
     var search = async (query) => {
         const id = reqId++;
@@ -126,7 +128,7 @@
         console.log(message)
         const id = reqId++;
         const q = `/new?recipient=${encodeURIComponent(recipient)}&message=${encodeURIComponent(message)}`;
-        res = await fetch(q, { method: 'post'});
+        res = await fetch(q, { method: 'post', headers:{"X-CSRF-Token": csrf_token}});
         console.log(res);
         const head = document.createElement('h3');
         head.textContent = `[${id}]  ${q} → ${res.status} ${res.statusText}`;
