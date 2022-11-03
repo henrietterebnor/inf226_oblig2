@@ -92,6 +92,7 @@
         </div>
         <div id="anchor"></div>
     </div>
+
 <script>
     var reqId = 0;
     var anchor = document.getElementById('anchor');
@@ -103,7 +104,7 @@
     var allBtn = document.getElementById('allBtn');
     var output = document.getElementById('output');
     var header = document.getElementById('header');
-
+    var csrf_token = "{{ csrf_token() }}";
 
     var search = async (query) => {
         const id = reqId++;
@@ -125,7 +126,7 @@
         console.log(message)
         const id = reqId++;
         const q = `/new?recipient=${encodeURIComponent(recipient)}&message=${encodeURIComponent(message)}`;
-        res = await fetch(q, { method: 'post' });
+        res = await fetch(q, { method: 'post'});
         console.log(res);
         const head = document.createElement('h3');
         head.textContent = `[${id}]  ${q} → ${res.status} ${res.statusText}`;

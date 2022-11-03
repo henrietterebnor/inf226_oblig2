@@ -3,3 +3,30 @@
 We thought the app.py to be a very messy file, and it seemed as quite a big task to refactor everything to a neat file with
 app.py as a starting point. We therefore decided to go for a different route, where we followed this tutorial to get
 started with a good form of authentication, the tutorial can be found here: https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login
+
+Testing :
+Write unit and integration tests to validate that all critical flows are resistant to the threat model. 
+Compile use-cases and misuse-cases for each tier of your application
+
+Har testet selv:
+- endre cookie, session avbrutt og vi blir logget ut.
+- SQL injection 
+
+
+The HTTP Content-Security-Policy response header allows web site administrators to control
+ resources the user agent is allowed to load for a given page. With a few exceptions, 
+ policies mostly involve specifying server origins and script endpoints. 
+ This helps guard against cross-site scripting attacks (Cross-site_scripting).
+ This is especially important when dealing with href tags in html. 
+
+
+ https://flask-login.readthedocs.io/en/latest/?fbclid=IwAR0RpkIwylepretehwAcmYzGNh96EL4fbz8nMNtCpN5uLw5R3xe2gj2jRXE
+ 
+ 
+ XSS:
+ https://semgrep.dev/docs/cheat-sheets/flask-xss/ --> render_template with flask and xss attack
+ mitigation. 
+ 
+ Escaping is the primary means to avoid cross-site scripting attacks. When escaping, you are effectively telling 
+ the web browser that the data you are sending should be treated as data and should not be interpreted in any 
+ other way.

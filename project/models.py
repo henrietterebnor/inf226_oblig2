@@ -14,4 +14,3 @@ class Messages(db.Model):
     recipient = db.Column(db.String(100), nullable=False)
     message = db.Column(db.String(1000), nullable=False)
     time = db.Column(db.DateTime(timezone=True), server_default=func.now())
-
