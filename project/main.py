@@ -9,11 +9,9 @@ from . import db
 
 main = Blueprint('main', __name__)
 
-
 @main.route('/')
 def index():
-    return render_template('index.html')
-
+    return render_template('login.html')
 
 @main.route('/profile')
 @login_required
