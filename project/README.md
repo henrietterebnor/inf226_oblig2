@@ -70,17 +70,16 @@ We have attached csrf token to these requests (comment added in the code as well
 #### SQL Injection Protection
 As mentioned previously we decided to use SQLAlchemy to init our database for this app. SQLAlchemy provides 
 useful builtin methods for queries and inserts. Because of this we avoid having to write 
-raw SQL when querying our database which 
+raw SQL when querying our database which protects us from SQL injections. In our receive_message() function in messaging.py
+we are querying our database with Messages.query.filter_by(sender=user_name, recipient=current_user.username) where 
+sender = user_name is input from our form in our application. This could be vulnerable to an injection if user_name contained special 
+characters, such as semicolons or apostrophes that could be interpreted as a SQL query. However, the SQLEngine object in SQLAlchemy
+will automatically quote them for us,  making it secure from SQL injections. 
+source : http://www.rmunn.com/sqlalchemy-tutorial/tutorial.html 
 
-Since you mentioned you weren’t writing raw SQL and are instead using the methods such as `add` you are well protected.
-This is because under the hood SQLAlchemy will auto escape any parameters and/or special characters
-that would be interpreted as part of valid SQL commands if it were just part of a raw string.
-Here is an example below:
-When printing out the select query, we can see that it clearly uses
-prepared statements, which gives us a much higher level of security t
-than something like an f-string would. 
 
 #### XSS PROTECTION
+
 The HTTP Content-Security-Policy response header allows web site administrators to control
  resources the user agent is allowed to load for a given page. With a few exceptions, 
  policies mostly involve specifying server origins and script endpoints. 
@@ -98,12 +97,9 @@ was no longer successful, meaning that our
 - Try to create a new user that already exists -> fails as expected
 - Try to alter the cookie value for the session of the logged in user in the web developer tool -> behaves as expected : when refreshing page the user is automatically logged out 
 
-. 
 
  https://flask-login.readthedocs.io/en/latest/?fbclid=IwAR0RpkIwylepretehwAcmYzGNh96EL4fbz8nMNtCpN5uLw5R3xe2gj2jRXE
 
-
-The 
 
 #### Cookie inspection
 Upon inspecting the cookies stored, we noticed that there was a check missing in the
