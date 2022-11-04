@@ -1,7 +1,7 @@
 import flask
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
-from .messaging import send, search
+from .messaging import send, receive_message, receive_all_messages
 from sqlalchemy.sql import func, select
 from project.models import Messages, User
 
@@ -35,19 +35,12 @@ def messaging():
 
 @main.route('/messages', methods=['GET'])
 @login_required
-def search_message():
-    query = request.args.get('q') or request.form.get('q') or '*'
-    sql = ("SELECT message, sender FROM messages WHERE sender = '%s' AND recipient = '%s'", (query, current_user.username))
-    result = search(query)
-    return result
-
-
-@main.route('/messages', methods=['GET'])
-@login_required
-def search_single_message():
-    query = request.args.get('q') or request.form.get('q') or '*'
-    stmt = f"SELECT message FROM messages WHERE id ='{query}'"
-    result = search(stmt)
+def receive_message_from_user():
+    user_name = request.args.get('q') or request.form.get('q')
+    if user_name == '' or user_name == '*':
+        result = receive_all_messages()
+    else:
+        result = receive_message(user_name)
     return result
 
 

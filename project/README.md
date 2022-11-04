@@ -18,7 +18,7 @@ The HTTP Content-Security-Policy response header allows web site administrators 
  policies mostly involve specifying server origins and script endpoints. 
  This helps guard against cross-site scripting attacks (Cross-site_scripting).
  This is especially important when dealing with href tags in html. 
-
+ 
 
  https://flask-login.readthedocs.io/en/latest/?fbclid=IwAR0RpkIwylepretehwAcmYzGNh96EL4fbz8nMNtCpN5uLw5R3xe2gj2jRXE
  
@@ -30,3 +30,9 @@ The HTTP Content-Security-Policy response header allows web site administrators 
  Escaping is the primary means to avoid cross-site scripting attacks. When escaping, you are effectively telling 
  the web browser that the data you are sending should be treated as data and should not be interpreted in any 
  other way.
+
+SQL INJECTION PROTECTION:
+Since you mentioned you weren’t writing raw SQL and are instead using the methods such as `add` you are well protected.
+This is because under the hood SQLAlchemy will auto escape any parameters and/or special characters
+that would be interpreted as part of valid SQL commands if it were just part of a raw string.
+Here is an example below:

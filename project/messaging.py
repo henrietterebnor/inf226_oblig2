@@ -1,4 +1,4 @@
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from flask import Flask, abort, request, send_from_directory, make_response, render_template, Blueprint
 from pygments import highlight
@@ -8,14 +8,12 @@ from pygments.filters import NameHighlightFilter, KeywordCaseFilter
 from pygments import token;
 from threading import local
 from sqlalchemy.orm import Session
-import apsw
 from apsw import Error
 from sqlalchemy.ext.serializer import loads, dumps
-#from json import dumps, loads
-from markupsafe import escape
 from project.models import Messages, User
 from . import db
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine
+
 engine = create_engine("sqlite:///instance/db.sqlite", echo=True, connect_args={'check_same_thread':False})
 with Session(engine) as session:
     w = (session.query(Messages).filter_by(recipient='e').all())
@@ -37,6 +35,7 @@ def pygmentize(text):
         tls.lexer.add_filter(KeywordCaseFilter(case='upper'))
     return f'<span class="highlight">{highlight(text, tls.lexer, tls.formatter)}</span>'
 
+"""
 @messaging.get('/search')
 def search(sql):
     statement = session.query(Messages).filter_by(recipient=sql)
@@ -45,9 +44,6 @@ def search(sql):
     query2 = loads(serialized, session)
 
     try:
-        #c = conn.execute(statement)
-        #rows = c.fetchall()
-        rows = result
         result ='Result:\n'
         for query in query2:
             qObject = {'sender': query.sender,
@@ -59,6 +55,34 @@ def search(sql):
         return result
     except Error as e:
         return (f'{result}ERROR: {e}', 500)
+"""
+@messaging.get('/search')
+def receive_all_messages():
+    try:
+        messages = Messages.query.filter_by(recipient=current_user.username)
+        result = ''
+        for message in messages:
+            result += message.sender + " sent this message : " + message.message + " to you, username : " + message.recipient + "\n"
+        if len(result)==0:
+            result = 'No messages received'
+        return (f'{result}')
+    except Error as e:
+        return 'ERROR : ' + e
+
+
+@messaging.get('/search')
+def receive_message(user_name):
+    try:
+        messages = Messages.query.filter_by(sender=user_name, recipient=current_user.username)
+        result = ''
+        for message in messages:
+            result += message.sender + " sent this message : " + message.message + " to you, username : " + message.recipient + "\n"
+        if len(result) == 0:
+            result = 'No messages received from this user'
+        return (f'{result}')
+
+    except Error as e:
+        return 'ERROR : ' + e
 
 #B';  DROP TABLE messages; --
 def send(username, message, recipient, time):
