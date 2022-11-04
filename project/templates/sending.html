@@ -105,7 +105,7 @@
     var allBtn = document.getElementById('allBtn');
     var output = document.getElementById('output');
     var header = document.getElementById('header');
-    var csrf_token = document.querySelector("[name='csrf-token']").content
+    var csrf_token = document.querySelector("[name='csrf-token']").content             //creating variable for CSRF token, declared in base.html metadata
 
 
 
@@ -129,7 +129,7 @@
         console.log(message)
         const id = reqId++;
         const q = `/new?recipient=${encodeURIComponent(recipient)}&message=${encodeURIComponent(message)}`;
-        res = await fetch(q, { method: 'post', headers:{"X-CSRF-Token": csrf_token}});
+        res = await fetch(q, { method: 'post', headers:{"X-CSRF-Token": csrf_token}});       //CSRF token attached to the POST request
         console.log(res);
         const head = document.createElement('h3');
         head.textContent = `[${id}]  ${q} → ${res.status} ${res.statusText}`;
