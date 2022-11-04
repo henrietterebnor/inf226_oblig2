@@ -51,8 +51,9 @@ salt and hashes the password. We have manually checked that the password
 is not stored directly in the database, and that they are all different. 
 
 #### Login, Logout, and Sessions
-@loginrequired
-forklare hvordan vi henter dataeen til current user i messages. 
+Documentation for how Flask Login works:
+https://flask-login.readthedocs.io/en/latest/?fbclid=IwAR0RpkIwylepretehwAcmYzGNh96EL4fbz8nMNtCpN5uLw5R3xe2gj2jRXE
+- Need to explain how we use flask.current_user to retrieve the correct messages from the db.
 
 #### CSRF - attack prevention
 In order to prevent CSRF attacks we enabled CSRF protection globally for our Flask app in __init__.py. 
@@ -80,26 +81,19 @@ source : http://www.rmunn.com/sqlalchemy-tutorial/tutorial.html
 
 #### XSS PROTECTION
 
+Escaping is the primary means to avoid cross-site scripting attacks. When escaping, you are effectively telling 
+the web browser that the data you are sending should be treated as data and should not be interpreted in any other way.
+f an attacker manages to put a malicious script on your page, the victim will not be affected because the browser will not execute
+ the script if it is properly escaped. In HTML, you can escape dangerous characters by using HTML entities, for example, 
+ the &# sequence followed by its character code
+ 
+ - render_template() ensures that we properly escape the html.
+ 
 The HTTP Content-Security-Policy response header allows web site administrators to control
  resources the user agent is allowed to load for a given page. With a few exceptions, 
  policies mostly involve specifying server origins and script endpoints. 
  This helps guard against cross-site scripting attacks (Cross-site_scripting).
  This is especially important when dealing with href tags in html
-
-### Testing 
-Testing is important to ensure that the application works as expected, and to validate that it is resistant to exploits.
-Optimally, we should have created unit and integration tests, but we instead did some manual tests to check that the 
-security measures that we have implemented works as expected. 
-- We created a user named B'; DROP TABLE messages'; -- which is a SQL injection that we tried on the old application. 
-After we created this user we tried to search for messages from this user to see if the injection would work now. It 
-was no longer successful, meaning that our 
-- Try to create a new user with a weak password -> fails as expected
-- Try to create a new user that already exists -> fails as expected
-- Try to alter the cookie value for the session of the logged in user in the web developer tool -> behaves as expected : when refreshing page the user is automatically logged out 
-
-
- https://flask-login.readthedocs.io/en/latest/?fbclid=IwAR0RpkIwylepretehwAcmYzGNh96EL4fbz8nMNtCpN5uLw5R3xe2gj2jRXE
-
 
 #### Cookie inspection
 Upon inspecting the cookies stored, we noticed that there was a check missing in the
@@ -111,3 +105,15 @@ flask really was. According to some, decrypting it was not at all that hard. To 
 our application, we set the login_manager.session_protection to "strong". This protects 
 the users from attacks involving stolen cookies, because the correct IP-address will be  
 attached to the cookie
+
+#### Testing 
+Testing is important to ensure that the application works as expected, and to validate that it is resistant to exploits.
+Optimally, we should have created unit and integration tests, but we instead did some manual tests to check that the 
+security measures that we have implemented works as expected. 
+- We created a user named B'; DROP TABLE messages'; -- which is a SQL injection that we tried on the old application. 
+After we created this user we tried to search for messages from this user to see if the injection would work now. It 
+was no longer successful. The reason why we tried this particularly for search for messages is because this queries the database
+with the filter function that accepts user input. All of the other queries do not use user input. 
+- Try to create a new user with a weak password -> fails as expected
+- Try to create a new user that already exists -> fails as expected
+- Try to alter the cookie value for the session of the logged in user in the web developer tool -> behaves as expected : when refreshing page the user is automatically logged out 

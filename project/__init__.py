@@ -14,14 +14,14 @@ def create_app():
     #made with import os, os.urandom(24)
     app.config['SECRET_KEY'] = b'\x8d\x07Q\x06\x8a8\x9f\x0c"\xc4\xca`\xc9\xe0\xec\xe3\x92v"4c\xa0,/'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
-    app.config['SESSION_COOKIE_SECURE'] = True
+    #app.config['SESSION_COOKIE_SECURE'] = True --> BUG, see readme, inspection cookies section for why we wanted to use this
 
     db.init_app(app)
     csrf.init_app(app)
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
-    login_manager.session_protection = "strong"
+    login_manager.session_protection = 'Strong'
     login_manager.init_app(app)
 
     from .models import User

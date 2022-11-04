@@ -71,7 +71,9 @@
         }
 
     </style>
-
+    <h1 class="title">
+        {{ name }}s mailbox
+    </h1>
     <div id="page">
         <marquee>
             <div id="header"></div>
@@ -81,9 +83,9 @@
         </main>
         <div id="controls">
             <label for="search">Search:</label>
-            <input type="search" id="search" name="search" placeholder="Enter the user you want to retrieve messages from" value="">
-            <button type="button" id="searchBtn">Receive single</button>
-            <button type="button" id="allBtn">Receive all</button>
+            <input type="search" id="search" name="search" placeholder="Enter the user you want to display messages from" value="">
+            <button type="button" id="searchBtn">Search</button>
+            <button type="button" id="allBtn">Show Inbox</button>
             <label for="recipient">To:</label>
             <input type="search" id="recipient" name="recipient" placeholder="Enter the user you want to send a message to" value="">
             <button type="button" id="sendBtn">Send</button>

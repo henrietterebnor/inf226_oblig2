@@ -5,13 +5,13 @@ from . import db
 from flask_login import login_user, login_required, logout_user
 from password_strength import PasswordPolicy, PasswordStats
 
-
-
 auth = Blueprint('auth', __name__)
 
 policy = PasswordPolicy.from_names(
     strength=0.66
 )
+
+
 @auth.route('/login')
 def login():
     return render_template('login.html')
@@ -46,10 +46,9 @@ def signup_post():
     password = request.form.get('password')
     user = User.query.filter_by(
         username=username).first()  # if this returns a user, then the email already exists in database
-#prcjdøGusbnr3klfud87
 
     stats = PasswordStats(password)
-    if stats.strength()<0.5:
+    if stats.strength() < 0.5:
         print(stats.strength())
         flash("Your password is weak, we recommend a length of at least 15")
         return redirect(url_for('auth.signup'))
@@ -59,7 +58,6 @@ def signup_post():
     if user:  # if a user is found, we want to redirect back to signup page so user can try again
         flash('Username already exists, try another one')
         return redirect(url_for('auth.signup'))
-
 
     # create a new user with the form data. Hash the password so the plaintext version isn't saved.
     new_user = User(username=username, password=generate_password_hash(password, method='sha256'))
@@ -76,4 +74,3 @@ def signup_post():
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
-

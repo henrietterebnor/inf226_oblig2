@@ -2,10 +2,8 @@ import flask
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from .messaging import send, receive_message, receive_all_messages
-from sqlalchemy.sql import func, select
-from project.models import Messages, User
+from sqlalchemy.sql import func
 
-from . import db
 
 # Run this in terminal
 # python3 -m venv auth
@@ -21,6 +19,7 @@ resp.headers['Content-Security-Policy'] = "default-src 'self'"
 def index():
     return render_template('login.html')
 
+
 @main.route('/profile')
 @login_required
 def profile():
@@ -30,7 +29,7 @@ def profile():
 @main.route('/searchAndSend')
 @login_required
 def messaging():
-    return render_template('sending.html')
+    return render_template('sending.html', name=current_user.username)
 
 
 @main.route('/messages', methods=['GET'])
