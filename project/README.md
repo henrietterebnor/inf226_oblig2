@@ -36,3 +36,23 @@ Since you mentioned you weren’t writing raw SQL and are instead using the meth
 This is because under the hood SQLAlchemy will auto escape any parameters and/or special characters
 that would be interpreted as part of valid SQL commands if it were just part of a raw string.
 Here is an example below:
+When printing out the select query, we can see that it clearly uses
+prepared statements, which gives us a much higher level of security t
+than something like an f-string would. 
+
+We implemented password checking from the package password_strength, 
+and decided to only check the strength, and not uppercase and length 
+etc, because we know these requirements do not matter particularly, as
+length is the most important when it comes to password guessing and 
+brute force attacks. 
+We saw the recommendation of limiting the password strength requirement
+at 0.66, but while testing we thought it was very strict and not very 
+user friendly, so we decided to be a bit more lenient than recommended
+and set it at 0.5.
+It is quite tiresome to come up with a password that works, so here is one
+that will pass: prcjdøGusbnr3klfud87.
+
+We use the generate_password_hash() from werkzeug.security to hash the
+passwords before they are stored in the database. This method both adds
+salt and hashes the password. We have manually checked that the password
+is not stored directly in the database, and that they are all different. 

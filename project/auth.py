@@ -3,10 +3,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 from . import db
 from flask_login import login_user, login_required, logout_user
+from password_strength import PasswordPolicy, PasswordStats
+
+
 
 auth = Blueprint('auth', __name__)
 
-
+policy = PasswordPolicy.from_names(
+    strength=0.66
+)
 @auth.route('/login')
 def login():
     return render_template('login.html')
@@ -16,7 +21,6 @@ def login():
 def login_post():
     username = request.form.get('username')
     password = request.form.get('password')
-    remember = True if request.form.get('remember') else False
 
     user = User.query.filter_by(username=username).first()
 
@@ -27,7 +31,7 @@ def login_post():
         return redirect(url_for('auth.login'))  # if the user doesn't exist or password is wrong, reload the page
 
     # if the above check passes, then we know the user has the right credentials
-    login_user(user, remember=remember)
+    login_user(user)
     return redirect(url_for('main.profile'))
 
 
@@ -40,9 +44,17 @@ def signup():
 def signup_post():
     username = request.form.get('username')
     password = request.form.get('password')
-
     user = User.query.filter_by(
         username=username).first()  # if this returns a user, then the email already exists in database
+#prcjdøGusbnr3klfud87
+
+    stats = PasswordStats(password)
+    if stats.strength()<0.5:
+        print(stats.strength())
+        flash("Your password is weak, we recommend a length of at least 15")
+        return redirect(url_for('auth.signup'))
+    else:
+        print(stats.strength())
 
     if user:  # if a user is found, we want to redirect back to signup page so user can try again
         flash('Username already exists, try another one')

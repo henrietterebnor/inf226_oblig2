@@ -15,13 +15,9 @@ from . import db
 from sqlalchemy import create_engine
 
 engine = create_engine("sqlite:///instance/db.sqlite", echo=True, connect_args={'check_same_thread':False})
-with Session(engine) as session:
-    w = (session.query(Messages).filter_by(recipient='e').all())
-    #session.add(some)
 
 messaging = Blueprint('messaging', __name__)
 tls = local()
-#conn = apsw.Connection('instance/db.sqlite')
 conn = engine.connect()
 
 
@@ -35,27 +31,6 @@ def pygmentize(text):
         tls.lexer.add_filter(KeywordCaseFilter(case='upper'))
     return f'<span class="highlight">{highlight(text, tls.lexer, tls.formatter)}</span>'
 
-"""
-@messaging.get('/search')
-def search(sql):
-    statement = session.query(Messages).filter_by(recipient=sql)
-    result = session.execute(statement).scalars().all()
-    serialized = dumps(result)
-    query2 = loads(serialized, session)
-
-    try:
-        result ='Result:\n'
-        for query in query2:
-            qObject = {'sender': query.sender,
-                       'recipient': query.recipient,
-                       'message': query.message,
-                       'time': query.time}
-            result = f'{result}    {((qObject))}\n'
-        #c.close()
-        return result
-    except Error as e:
-        return (f'{result}ERROR: {e}', 500)
-"""
 @messaging.get('/search')
 def receive_all_messages():
     try:
@@ -84,7 +59,7 @@ def receive_message(user_name):
     except Error as e:
         return 'ERROR : ' + e
 
-#B';  DROP TABLE messages; --
+#
 def send(username, message, recipient, time):
     try:
         if not username or not message:
@@ -93,9 +68,6 @@ def send(username, message, recipient, time):
         if not exists:
             return f'ERROR: {recipient} user does not exist!'
         newMessage = Messages(sender=username, recipient = recipient, message=message);
-        #stmt = ('INSERT INTO messages (sender, message) VALUES (?,?)',(sender, message))
-        # ('INSERT INTO messages (sender, message, recipient, time) VALUES (?,?,?,?)',
-        # (username, message, person, date_now))
         stmt = f"INSERT INTO messages (sender, recipient, message, time) values ('{username}','{recipient}' '{message}', '{time}')";
         result = f"Query: {pygmentize(stmt)}\n"
         db.session.add(newMessage)
