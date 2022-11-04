@@ -14,8 +14,22 @@ assignment did not mention anything about it, and how it should work, we chose t
 announcement function from our code as well since it would have been unused. It is good practice to always remove unused code
 as the greater the amount of code, the greater the risks for bugs which causes the application to be more vulnerable for exploits.
 
-### The issue with the previous application
-take it away maria
+#### The issue with the previous application
+The original application had many flaws that needed improving. The first thing
+we wanted to improve was the structure. App.py was ill-structured, and had a lot 
+of different purposes. We started out with isolating the login-logout stuff, and
+followed a tutorial from this page: https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login
+We found that a lot of secure procedures came free with flask_login, and the tutorial 
+also included the hashing of password, and of course password checking, which lacked 
+in the original project. We decided to continue using SQLalchemy, which the tutorial also
+used, and it proved very useful in the protection of sql injections with the built
+in methods for queries and inserts. In the login-server project we started out with, 
+there was a lot of raw SQL, which is what one should especially avoid to protect oneself
+against SQL-injections. The original project only used a dictionary as a database for
+the users, so we created messages and user tables in the database. 
+
+The original project did not handle any of the common security exploits, and we will now discuss
+how we have implemented protection against these. 
 
 #### Handling passwords
 We implemented password checking from the package password_strength, 
@@ -80,3 +94,16 @@ The HTTP Content-Security-Policy response header allows web site administrators 
  Escaping is the primary means to avoid cross-site scripting attacks. When escaping, you are effectively telling 
  the web browser that the data you are sending should be treated as data and should not be interpreted in any 
  other way.
+
+The 
+
+#### Cookie inspection
+Upon inspecting the cookies stored, we noticed that there was a check missing in the
+"Secure" column of the cookie attributes. If this attribute is checked, it means that the 
+cookie is only ever sent to the server over the HTTPS protocol. Flask has an easy way of 
+setting this attribute to true, so we did just that. We found from searching
+that there were differing opinions on exactly how secure the session cookie provided by
+flask really was. According to some, decrypting it was not at all that hard. To further secure
+our application, we set the login_manager.session_protection to "strong". This protects 
+the users from attacks involving stolen cookies, because the correct IP-address will be  
+attached to the cookie
