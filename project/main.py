@@ -2,7 +2,9 @@ import flask
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from .messaging import send, search
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, select
+from project.models import Messages, User
+
 from . import db
 
 # Run this in terminal
@@ -36,12 +38,11 @@ def messaging():
 def search_message():
     query = request.args.get('q') or request.form.get('q') or '*'
     sql = ("SELECT message, sender FROM messages WHERE sender = '%s' AND recipient = '%s'", (query, current_user.username))
-    #tuplee = (query, current_user.username)
-    result = search(sql)
+    result = search(query)
     return result
 
 
-@main.route('/messages/id', methods=['GET'])
+@main.route('/messages', methods=['GET'])
 @login_required
 def search_single_message():
     query = request.args.get('q') or request.form.get('q') or '*'
