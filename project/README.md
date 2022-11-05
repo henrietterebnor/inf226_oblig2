@@ -40,10 +40,10 @@ etc, because we know these requirements do not matter particularly, as
 length is the most important when it comes to password guessing and 
 brute force attacks. 
 We saw the recommendation of limiting the password strength requirement
-at 0.66, but while testing we thought it was very strict and not very 
-user friendly, so we decided to be a bit more lenient than recommended
-and set it at 0.5.
-It is quite tiresome to come up with a password that works, so here is one
+at 0.66, while testing we thought it was very strict and not very 
+user friendly, but simple passwords are one of the mayor contributors to
+security breaches, so our users will just have to come up with long passwords. 
+It is quite tiresome though, to come up with a password that works, so here is one
 that will pass: prcjdøGusbnr3klfud87.
 
 We use the generate_password_hash() from werkzeug.security to hash the
@@ -151,8 +151,22 @@ with the filter function that accepts user input. All of the other queries do no
 
 
 Threat model – who might attack the application? What can an attacker do? What damage could be done (in terms of confidentiality, integrity, availability)? Are there limits to what an attacker can do? Are there limits to what we can sensibly protect against?
-What are the main attack vectors for the application?
-What should we do (or what have you done) to protect against attacks?
+##### What are the main attack vectors for the application?
+Now that we have committed our secret key several times, it is easier to steal session cookies than it should be.
+Furthermore, our session cookie is not set to secure, as it kept creating a bug in Safari, so
+that puts us further at risk. Other than that, we think the user input getting messed with is
+what puts us  most at risk, but we hope we have implemented enough security to avoid the big three 
+
+
+##### What should we do (or what have you done) to protect against attacks?
+See the other sections on XSS, CSRF, Cookies and SQL Injections to read what we have done
+to prevent them. We have had secure design in mind throughout  the process, always checking
+if an imported functionality provides good enough security, and we have done our best to 
+make the weaker parts of our application resilient enough. We have not been able to attempt
+to hack into our own system as much as we would have liked to, but the ways we have tried is
+described above. The next step in protecting against attacks would therefore definitely be 
+to set up a lot of tests to find every vulnerability our application has.
+
 What is the access control model? 
 
 ##### How can you know that your security is good enough?
