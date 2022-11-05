@@ -57,7 +57,13 @@ our database, and by using the parameter UserMixin, we did not need to implement
 the UserMixin provides this for us. In __init__.py we create the app, and create a login manager. We also have 
 a user loader there, which is used by flask_login find a user by the ID stored in their session cookie. The database
 is also created here, and also the blueprints. Two elements we found especially useful from flask was the @login_required 
-and current_user. 
+and current_user. With this built in method we were able to keep track of who was the logged in user, and were
+therefore able to retrieve the messages that had been sent to them. 
+By using the login method in flask a session will be created automatically for that user and the cookie for that
+session will be set. When logging out that session is disables and the cookie is removed as well.
+Why are sessions important? Also, what is "MY_S3CR3TS" and is that really the best one? We change in init, why? 
+What does it do? 
+
 Documentation for how Flask Login works:
 Then, you need to specify the user loader. A user loader tells Flask-Login how to find a specific user from the ID that is stored in their session cookie. 
 https://flask-login.readthedocs.io/en/latest/?fbclid=IwAR0RpkIwylepretehwAcmYzGNh96EL4fbz8nMNtCpN5uLw5R3xe2gj2jRXE
@@ -87,36 +93,18 @@ characters, such as semicolons or apostrophes that could be interpreted as a SQL
 will automatically quote them for us,  making it secure from SQL injections. 
 source : http://www.rmunn.com/sqlalchemy-tutorial/tutorial.html 
 
-Since you mentioned you weren’t writing raw SQL and are instead using the methods such as `add` you are well protected.
-This is because under the hood SQLAlchemy will auto escape any parameters and/or special characters
-that would be interpreted as part of valid SQL commands if it were just part of a raw string.
-Here is an example below:
-When printing out the select query, we can see that it clearly uses
-prepared statements, which gives us a much higher level of security t
-than something like an f-string would. 
-
 We also tried sqlmap to test for any vulnerabilities, but we are not sure it worked as it 
 did not seem to do much. It did not warn about anything critical in relation to the sql, but
 it did warn about some technical issues we had no problems with. We decided not to look further
 into this, and hoped that what we read about SQLAlchemy's filter_by is enough to protect 
 our application. 
 
-#### XSS PROTECTION
-
-Escaping is the primary means to avoid cross-site scripting attacks. When escaping, you are effectively telling 
-the web browser that the data you are sending should be treated as data and should not be interpreted in any other way.
-f an attacker manages to put a malicious script on your page, the victim will not be affected because the browser will not execute
- the script if it is properly escaped. In HTML, you can escape dangerous characters by using HTML entities, for example, 
- the &# sequence followed by its character code
-
-
- - render_template() ensures that we properly escape the html.
- 
-The HTTP Content-Security-Policy response header allows web site administrators to control
- resources the user agent is allowed to load for a given page. With a few exceptions, 
- policies mostly involve specifying server origins and script endpoints. 
- This helps guard against cross-site scripting attacks (Cross-site_scripting).
- This is especially important when dealing with href tags in html.
+#### Cross-Site Scripting Protection
+We have used the Jinja templating language to render our HTML templates, meaning that 
+whenever a user requests something from our application (such as the login-, signup-, profile- or messaging-page) 
+Jinja will respond with an HTML template. Jinja will also automatically escape the HTML which is the primary means to protect
+us from xss attacks because we are strictly telling the browser that the data we are sending should be interpreted only as data. 
+We 
 
 Flask automatically sets the httpOnly flag to true. According to Mozilla MDN Web Docs, 
 a cookie with the httpOnly attribute will only be sent to the server, and they are
@@ -163,8 +151,6 @@ with the filter function that accepts user input. All of the other queries do no
 - Try to create a new user that already exists -> fails as expected
 - Try to alter the cookie value for the session of the logged in user in the web developer tool -> behaves as expected : when refreshing page the user is automatically logged out 
 
-attached to the cookie, and if the wrong ip-address occurs instead, the browser will jump
-to the start page.
 
 #### Further improvements
 Validate data, make the cookie secure, 

@@ -89,6 +89,9 @@
     var header = document.getElementById('header');
     var csrf_token = document.querySelector("[name='csrf-token']").content             //creating variable for CSRF token, declared in base.html metadata
 
+    function encodeHTML(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
 
 
     var search = async (query) => {
@@ -132,9 +135,9 @@
             search(searchField.value);
         }
     });
-    searchBtn.addEventListener('click', () => search(searchField.value));
-    allBtn.addEventListener('click', () => search('*'));
-    sendBtn.addEventListener('click', () => send(recipientField.value, messageField.value));
+    searchBtn.addEventListener('click', () => search(encodeHTML(searchField.value)));
+    allBtn.addEventListener('click', () => search(encodeHTML('*')));
+    sendBtn.addEventListener('click', () => send(encodeHTML(recipientField.value), encodeHTML(messageField.value)));
 
 </script>
 {% endblock %}
