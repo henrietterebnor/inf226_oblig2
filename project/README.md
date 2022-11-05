@@ -52,23 +52,22 @@ salt and hashes the password. We have manually checked that the password
 is not stored directly in the database, and that they are all different. 
 
 #### Login, Logout, and Sessions
-The flask_login package provided us with some really useful tools for our application. We started out with
+The FlaskLogin package provided us with some really useful tools for our application. We started out with
 our database, and by using the parameter UserMixin, we did not need to implement any methods for the user class, as
-the UserMixin provides this for us. In __init__.py we create the app, and create a login manager. We also have 
-a user loader there, which is used by flask_login find a user by the ID stored in their session cookie. The database
-is also created here, and also the blueprints. Two elements we found especially useful from flask was the @login_required 
-and current_user. With this built in method we were able to keep track of who was the logged in user, and were
-therefore able to retrieve the messages that had been sent to them. 
+the UserMixin provides this for us. In __init__.py we create the app, and create a login manager, which ties the
+application and FlaskLogin together. We also have a user loader there, which is used by FlaskLogin to find a user 
+by the ID stored in their session cookie. The database and the blueprints are also created here. Two elements we 
+found especially useful from flask was the @login_required and current_user. With this built in method we were able 
+to keep track of who was the logged in user, and were therefore able to retrieve the messages that had been sent to them. 
 By using the login method in flask a session will be created automatically for that user and the cookie for that
-session will be set. When logging out that session is disables and the cookie is removed as well.
-Why are sessions important? Also, what is "MY_S3CR3TS" and is that really the best one? We change in init, why? 
-What does it do? 
+session will be set. When logging out that session is disables and the cookie is replaced as well. We have documented 
+how we generated our secret key, now, we are not sure if we should have committed the actual secret key, but since this is a 
+school project we hope that it is fine. For a real application one should not commit the secret key. It is important 
+that it kept a secret, as it is crucial for securely signing the session cookie. If the secret key is obtained,
+it makes it easier to guess the session cookie value, and from there a lot of security breaches can happen. 
+More on session cookies in the cookie section below. 
 
-Documentation for how Flask Login works:
-Then, you need to specify the user loader. A user loader tells Flask-Login how to find a specific user from the ID that is stored in their session cookie. 
-https://flask-login.readthedocs.io/en/latest/?fbclid=IwAR0RpkIwylepretehwAcmYzGNh96EL4fbz8nMNtCpN5uLw5R3xe2gj2jRXE
-- Need to explain how we use flask.current_user to retrieve the correct messages from the db.
-- 
+
 
 #### CSRF - attack prevention
 In order to prevent CSRF attacks we enabled CSRF protection globally for our Flask app in __init__.py. 
@@ -113,6 +112,9 @@ When displaying the sent and received messages we are not rendering the page, we
 xss attacks here. We solved this by adding a simple HTML encoder in messaging.py in order to properly sanitize the user input.
 
 #### Cookie inspection
+Session cookies makes the user moving in between websites and still being logged in, and it also gives crucial security as it gives the single session-id that 
+that user can be and stay logged in with. They are generated and deleted within that "session", so they are not stored anywhere,
+which also makes them more secure. 
 Upon inspecting the cookies stored, we noticed that there was a check missing in the
 "Secure" column of the cookie attributes. If this attribute is checked, it means that the 
 cookie is only ever sent to the server over the HTTPS protocol. Flask has an easy way of 
@@ -130,7 +132,7 @@ Using cookies for security opposed to access tokens is a conscious choice on our
 Access tokens take more time to implement, and they have to be stored somewhere. They are
 immune to CSRF attacks, but we found that we would rather implement protection against the
 CSRF attacks, and go for cookies. 
-https://stackoverflow.com/questions/17000835/token-authentication-vs-cookies
+
 
 #### Testing 
 Testing is important to ensure that the application works as expected, and to validate that it is resistant to exploits.
@@ -145,7 +147,11 @@ with the filter function that accepts user input. All of the other queries do no
 - Try to alter the cookie value for the session of the logged in user in the web developer tool -> behaves as expected : when refreshing page the user is automatically logged out 
 
 
-#### Further improvements
-Validate data, make the cookie secure, 
+#### Answers to the questions
 
 
+Threat model – who might attack the application? What can an attacker do? What damage could be done (in terms of confidentiality, integrity, availability)? Are there limits to what an attacker can do? Are there limits to what we can sensibly protect against?
+What are the main attack vectors for the application?
+What should we do (or what have you done) to protect against attacks?
+What is the access control model?
+How can you know that you security is good enough? (traceability)
