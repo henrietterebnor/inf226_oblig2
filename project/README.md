@@ -23,7 +23,8 @@ We found that a lot of secure procedures came free with flask_login, and the tut
 also included the hashing of password, and of course password checking, which lacked 
 in the original project. We decided to continue using SQLAlchemy, which the tutorial also
 used, and it proved very useful in the protection of sql injections with the built
-in methods for queries and inserts. In the login-server project we started out with, 
+in methods for queries and inserts. It also serializes with JSON, which provides more security
+than for example Python's Pickle Module. In the login-server project we started out with, 
 there was a lot of raw SQL, which is what one should especially avoid to protect oneself
 against SQL-injections. The original project only used a dictionary as a database for
 the users, so we created messages and user tables in the database. 
@@ -78,6 +79,19 @@ characters, such as semicolons or apostrophes that could be interpreted as a SQL
 will automatically quote them for us,  making it secure from SQL injections. 
 source : http://www.rmunn.com/sqlalchemy-tutorial/tutorial.html 
 
+Since you mentioned you weren’t writing raw SQL and are instead using the methods such as `add` you are well protected.
+This is because under the hood SQLAlchemy will auto escape any parameters and/or special characters
+that would be interpreted as part of valid SQL commands if it were just part of a raw string.
+Here is an example below:
+When printing out the select query, we can see that it clearly uses
+prepared statements, which gives us a much higher level of security t
+than something like an f-string would. 
+
+We also tried sqlmap to test for any vulnerabilities, but we are not sure it worked as it 
+did not seem to do much. It did not warn about anything critical in relation to the sql, but
+it did warn about some technical issues we had no problems with. We decided not to look further
+into this, and hoped that what we read about SQLAlchemy's filter_by is enough to protect 
+our application. 
 
 #### XSS PROTECTION
 
@@ -93,18 +107,40 @@ The HTTP Content-Security-Policy response header allows web site administrators 
  resources the user agent is allowed to load for a given page. With a few exceptions, 
  policies mostly involve specifying server origins and script endpoints. 
  This helps guard against cross-site scripting attacks (Cross-site_scripting).
- This is especially important when dealing with href tags in html
+ This is especially important when dealing with href tags in html.
+
+Flask automatically sets the httpOnly flag to true. According to Mozilla MDN Web Docs, 
+a cookie with the httpOnly attribute will only be sent to the server, and they are
+not accessible by Javascript's `document.cookie `API. One is not fully protected 
+against XSS attacks with this attribute, in fact, it kind of just lessens the impact
+if one were to be submitted to an attack. To actually prevent XSS attacks, one has to 
+filter and validate every input. Validating passwords and usernames would be pretty 
+easy, as it is standard for websites to have some limitations on exactly what characters 
+these can be made up of, but validating the messages seems a bit unrealistic for an email-
+sending-and-receiving type application. 
+We have not really done either in this application, 
+but that would be one of the next steps we would take, if we had more time. 
+
 
 #### Cookie inspection
 Upon inspecting the cookies stored, we noticed that there was a check missing in the
 "Secure" column of the cookie attributes. If this attribute is checked, it means that the 
 cookie is only ever sent to the server over the HTTPS protocol. Flask has an easy way of 
-setting this attribute to true, so we did just that. We found from searching
+setting this attribute to true, so we did just that in __init__.py. This unfortunately led to 
+some bugs discovered when testing in safari, where it did not seem that the logout
+function from flask worked any longer. We therefore decided to leave it out. 
+We found from searching
 that there were differing opinions on exactly how secure the session cookie provided by
 flask really was. According to some, decrypting it was not at all that hard. To further secure
 our application, we set the login_manager.session_protection to "strong". This protects 
 the users from attacks involving stolen cookies, because the correct IP-address will be  
 attached to the cookie
+
+Using cookies for security opposed to access tokens is a conscious choice on our part. 
+Access tokens take more time to implement, and they have to be stored somewhere. They are
+immune to CSRF attacks, but we found that we would rather implement protection against the
+CSRF attacks, and go for cookies. 
+https://stackoverflow.com/questions/17000835/token-authentication-vs-cookies
 
 #### Testing 
 Testing is important to ensure that the application works as expected, and to validate that it is resistant to exploits.
@@ -117,3 +153,11 @@ with the filter function that accepts user input. All of the other queries do no
 - Try to create a new user with a weak password -> fails as expected
 - Try to create a new user that already exists -> fails as expected
 - Try to alter the cookie value for the session of the logged in user in the web developer tool -> behaves as expected : when refreshing page the user is automatically logged out 
+
+attached to the cookie, and if the wrong ip-address occurs instead, the browser will jump
+to the start page.
+
+#### Further improvements
+Validate data, make the cookie secure, 
+
+
