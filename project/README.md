@@ -5,11 +5,11 @@ app.py as a starting point. We therefore decided to go for a different route, wh
 started with a good form of authentication, the tutorial can be found here: https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login
 
 #### The functional aspect 
-We wanted our web application to function like an email. The logged in user can send messages to
+We wanted our web application to function like an email. The logged in entity can send messages to
 another user by typing their username in the form, and then enter their message in the message field before pressing send.
-To receive messages from a specific user the logged in user must enter their username in the Search field and then press
-the 'Receive single' button. If a logged in user wishes to see all messages that have been sent to them, then they can 
-simply press the 'Receive all' button. There was some implementation already for an announcement function, but since the 
+To receive messages from a specific user the logged in entity must enter a username in the Search field and then press
+the 'Search' button. If a logged in entity wishes to see all messages that have been sent to them, then they can 
+simply press the 'Show Inbox' button. There was some implementation already for an announcement function, but since the 
 assignment did not mention anything about it, and how it should work, we chose to remove this entirely. We have removed the
 announcement function from our code as well since it would have been unused. It is good practice to always remove unused code
 as the greater the amount of code, the greater the risks for bugs which causes the application to be more vulnerable for exploits.
@@ -100,7 +100,8 @@ the web browser that the data you are sending should be treated as data and shou
 f an attacker manages to put a malicious script on your page, the victim will not be affected because the browser will not execute
  the script if it is properly escaped. In HTML, you can escape dangerous characters by using HTML entities, for example, 
  the &# sequence followed by its character code
- 
+
+
  - render_template() ensures that we properly escape the html.
  
 The HTTP Content-Security-Policy response header allows web site administrators to control
