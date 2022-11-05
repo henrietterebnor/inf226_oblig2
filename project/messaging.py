@@ -41,7 +41,7 @@ def receive_message(user_name):
     except Error as e:
         return 'ERROR : ' + e
 
-#
+
 def send(username, message, recipient,time):
     try:
         if not username or not message:

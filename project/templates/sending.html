@@ -69,7 +69,7 @@
             <label for="recipient">To:</label>
             <input type="search" id="recipient" name="recipient" placeholder="Enter the user you want to send a message to" value="">
             <button type="button" id="sendBtn">Send</button>
-            <button type="button" id="sentBtn">Show sent</button>
+            <span></span>
             <label for="message">Message:</label>
             <textarea id="message" style="grid-row: span 4;"> </textarea>
         </div>
@@ -106,6 +106,7 @@
         anchor.scrollIntoView();
 
     };
+
     var send = async (recipient, message) => {
         console.log(recipient)
         console.log(message)
@@ -123,6 +124,8 @@
         anchor.scrollIntoView();
 
     };
+
+
 
     searchField.addEventListener('keydown', ev => {
         if (ev.key === 'Enter') {
