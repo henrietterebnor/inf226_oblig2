@@ -52,9 +52,17 @@ salt and hashes the password. We have manually checked that the password
 is not stored directly in the database, and that they are all different. 
 
 #### Login, Logout, and Sessions
+The flask_login package provided us with some really useful tools for our application. We started out with
+our database, and by using the parameter UserMixin, we did not need to implement any methods for the user class, as
+the UserMixin provides this for us. In __init__.py we create the app, and create a login manager. We also have 
+a user loader there, which is used by flask_login find a user by the ID stored in their session cookie. The database
+is also created here, and also the blueprints. Two elements we found especially useful from flask was the @login_required 
+and current_user. 
 Documentation for how Flask Login works:
+Then, you need to specify the user loader. A user loader tells Flask-Login how to find a specific user from the ID that is stored in their session cookie. 
 https://flask-login.readthedocs.io/en/latest/?fbclid=IwAR0RpkIwylepretehwAcmYzGNh96EL4fbz8nMNtCpN5uLw5R3xe2gj2jRXE
 - Need to explain how we use flask.current_user to retrieve the correct messages from the db.
+- 
 
 #### CSRF - attack prevention
 In order to prevent CSRF attacks we enabled CSRF protection globally for our Flask app in __init__.py. 
