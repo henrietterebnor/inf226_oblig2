@@ -100,24 +100,17 @@ into this, and hoped that what we read about SQLAlchemy's filter_by is enough to
 our application. 
 
 #### Cross-Site Scripting Protection
-We have used the Jinja templating language to render our HTML templates, meaning that 
-whenever a user requests something from our application (such as the login-, signup-, profile- or messaging-page) 
-Jinja will respond with an HTML template. Jinja will also automatically escape the HTML which is the primary means to protect
-us from xss attacks because we are strictly telling the browser that the data we are sending should be interpreted only as data. 
-We 
-
 Flask automatically sets the httpOnly flag to true. According to Mozilla MDN Web Docs, 
 a cookie with the httpOnly attribute will only be sent to the server, and they are
 not accessible by Javascript's `document.cookie `API. One is not fully protected 
 against XSS attacks with this attribute, in fact, it kind of just lessens the impact
 if one were to be submitted to an attack. To actually prevent XSS attacks, one has to 
-filter and validate every input. Validating passwords and usernames would be pretty 
-easy, as it is standard for websites to have some limitations on exactly what characters 
-these can be made up of, but validating the messages seems a bit unrealistic for an email-
-sending-and-receiving type application. 
-We have not really done either in this application, 
-but that would be one of the next steps we would take, if we had more time. 
-
+filter and validate every input. We have used the Jinja templating language to render our HTML templates, meaning that 
+whenever a user requests something from our application (such as the login-, signup-, profile- or messaging-page) 
+Jinja will respond with an HTML template. Jinja will also automatically escape the HTML which is the primary means to protect
+us from xss attacks because we are strictly telling the browser that the data we are sending should be interpreted only as data. 
+When displaying the sent and received messages we are not rendering the page, we therefore need to add a countermeasure to 
+xss attacks here. We solved this by adding a simple HTML encoder in messaging.py in order to properly sanitize the user input.
 
 #### Cookie inspection
 Upon inspecting the cookies stored, we noticed that there was a check missing in the

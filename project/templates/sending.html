@@ -89,9 +89,18 @@
     var header = document.getElementById('header');
     var csrf_token = document.querySelector("[name='csrf-token']").content             //creating variable for CSRF token, declared in base.html metadata
 
-    function encodeHTML(s) {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-    }
+    function encodeHTML(string) {
+        const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;',
+        };
+        const reg = /[&<>"'/]/ig;
+        return string.replace(reg, (match)=>(map[match]));
+   }
 
 
     var search = async (query) => {
