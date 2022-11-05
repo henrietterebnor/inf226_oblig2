@@ -147,11 +147,27 @@ with the filter function that accepts user input. All of the other queries do no
 - Try to alter the cookie value for the session of the logged in user in the web developer tool -> behaves as expected : when refreshing page the user is automatically logged out 
 
 
-#### Answers to the questions
+### Answers to the questions
 
 
 Threat model – who might attack the application? What can an attacker do? What damage could be done (in terms of confidentiality, integrity, availability)? Are there limits to what an attacker can do? Are there limits to what we can sensibly protect against?
 What are the main attack vectors for the application?
 What should we do (or what have you done) to protect against attacks?
-What is the access control model?
-How can you know that you security is good enough? (traceability)
+What is the access control model? 
+
+##### How can you know that your security is good enough?
+We have not implemented any logging for this application. It is common to write an event log, and it is smart to keep 
+track and know what has happened in one's application. We can see in the terminal 
+that flask logs all the requests made to the api, but these are not stored anywhere. It is 
+especially important to log events that involve something failing, as the application
+often times is at its most vulnerable during these events. If a security breach were to happen, 
+it is important to know what exactly happened and what data was exposed. This is especially
+important if one is sitting on personal information about users.
+
+We have not tested our application well enough to say that it is completely secure, but that
+would be a statement we probably would not have proclaimed after testing every possible attack one
+could think of. 
+
+What we have done is read up on the different ways one might be attacked, and implemented 
+what we could to protect our application from it. 
+
