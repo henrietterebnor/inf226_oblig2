@@ -46,6 +46,9 @@ used, and it proved very useful in the protection of sql injections with the bui
 in methods for queries and inserts. In the login-server project we started out with, 
 there was a lot of raw SQL, which is what one should especially avoid to protect oneself
 against SQL-injections. The original project only used a dictionary as a database for
+the users, so we created messages and user tables in the database. Furthermore, the original
+project did not handle any of the common security exploits like CSRF, xxs and SQL injections. We will
+go into detail later on how we have mitigated the risks of such attacks.
 the users, so we created messages and user tables in the database. 
 The original project did not handle any of the common security exploits, and we will now discuss
 how we have implemented protection against these. 
@@ -78,14 +81,12 @@ by the ID stored in their session cookie. The database and the blueprints are al
 found especially useful from flask was the @login_required and current_user. With this built in method we were able 
 to keep track of who was the logged in user, and were therefore able to retrieve the messages that had been sent to them. 
 By using the login method in flask a session will be created automatically for that user and the cookie for that
-session will be set. When logging out that session is disables and the cookie is replaced as well. We have documented 
+session will be set. When logging out that session is disabled and the cookie is replaced as well. We have documented 
 how we generated our secret key, now, we are not sure if we should have committed the actual secret key, but since this is a 
 school project we hope that it is fine. For a real application one should not commit the secret key. It is important 
 that it kept a secret, as it is crucial for securely signing the session cookie. If the secret key is obtained,
 it makes it easier to guess the session cookie value, and from there a lot of security breaches can happen. 
 More on session cookies in the cookie section below. 
-
-
 
 #### CSRF - attack prevention
 In order to prevent CSRF attacks we enabled CSRF protection globally for our Flask app in __init__.py. 
@@ -157,19 +158,48 @@ was no longer successful. The reason why we tried this particularly for search f
 with the filter function that accepts user input. All of the other queries do not use user input. 
 - Try to create a new user with a weak password -> fails as expected
 - Try to create a new user that already exists -> fails as expected
-- Try to alter the cookie value for the session of the logged in user in the web developer tool -> behaves as expected : when refreshing page the user is automatically logged out 
-
+- Try to alter the cookie value for the session of the logged in user in the web 
+developer tool -> behaves as expected : when refreshing page the user is automatically logged out 
+- Tried to <script>alert(‘XSS’)</script>
 
 ### Answers to the questions
 
+#### Threat Model
+The assets that we need to protect are the user credentials as well as the messages that the users have sent
+to each other as these can contain sensitive and private information. The threat agents are therefore
+people who have interests in gaining access to this information for a number of reasons. 
+If an attacker is successful in a password attack then confidentiality, authenticity, and availability would be compromised.
+Private messages would be made available, and the attacker could also impersonate as the user and send messages
+to others. The attacker being logged into the account would disable the actual user from accessing it. 
 
-Threat model – who might attack the application? What can an attacker do? What damage could be done (in terms of confidentiality, integrity, availability)? Are there limits to what an attacker can do? Are there limits to what we can sensibly protect against?
+Phishing, brute-forcing, and dictionary attacks are some ways of retrieving a password, so how can we counter measure these?
+By enforcing the user to create a strong passwords with a good length we make it much harder for an attacker to 
+successfully brute-force the password, and to prevent dictionary attacks we can encrypt the password with salt in our database.
+
+It is, however, quite hard to protect against all phishing attacks during application development as this is a weakness on the users side.
+One phishing attack we can counter measure is CSRF, which happens when a user is tricked into clicking a link or loading page. 
+In CSRF the attacker gains access over the session cookie which contains authentication data and represents the user’s session, 
+which is exploited to impersonate the user to perform malicious actions. If we add CSRF tokens to the users requests we have a 
+way of validating the origin of the request which in order to mitigate these types of attacks. 
+
+Injection attacks like xxs and sql injections could also result in compromised user credentials. These types of attacks
+pose a threat to not only confidentiality, but also integrity and availability as the data within the application could be 
+changed in an unauthorized manner which could cause issues with the availability of the application. To prevent these types
+of attacks it is important to sanitize user input so that it cannot be interpreted as SQL queries or html tags. 
+
+The limitations of the hacker depends heavily on the difficulty of the attack compared to how high the reward is. If our application
+were to be used as a mailing system in a successful business were the employees were to share sensitive and valuable information then the likelihood 
+of being exposed to attacks would most certainly increase. The limitations of what we can sensibly protect against follows the same rules. Questions like : should we
+spend a lot of resources on protecting something that has a low likelihood on being attacked? and, How big is the impact of that attack? Are important in order to
+determine what mitigations are within reason to perform. 
+
 ##### What are the main attack vectors for the application?
-Now that we have committed our secret key several times, it is easier to steal session cookies than it should be.
-Furthermore, our session cookie is not set to secure, as it kept creating a bug in Safari, so
-that puts us further at risk. Other than that, we think the user input getting messed with is
-what puts us  most at risk, but we hope we have implemented enough security to avoid the big three 
-
+- Compromised credentials where the username and password are exposed to an unauthorized entity. 
+- Missing encryption on data in transit. For now our application runs locally, but if this was not the case 
+the users messages would be vulnerable to passive attackers, compromising integrity and confidentiality. 
+- We are dealing with an email system so the users could be tricked into giving away personal and sensitive information 
+as a result of phishing. 
+- Injection of malicious scripts in our input fields
 
 ##### What should we do (or what have you done) to protect against attacks?
 See the other sections on XSS, CSRF, Cookies and SQL Injections to read what we have done
@@ -180,7 +210,14 @@ to hack into our own system as much as we would have liked to, but the ways we h
 described above. The next step in protecting against attacks would therefore definitely be 
 to set up a lot of tests to find every vulnerability our application has.
 
-What is the access control model? 
+
+##### What is the access control model? 
+In order for a user to access the mailing system that user first needs to be authenticated. Once
+authenticated that user gains access to their own emails and profile, it is not possible for any user
+to view conversations between others. Furthermore, a user can message any existing user, it is 
+therefore no restrictions on who you can send messages to. Given more time, we would have liked to change
+this and added functionality that would make it possible to block other users. But, for now all users
+have the same access rights, hence there exists no users with more privileged rights than others. 
 
 ##### How can you know that your security is good enough?
 We have not implemented any logging for this application. It is common to write an event log, and it is smart to keep 
