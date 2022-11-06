@@ -46,31 +46,12 @@ used, and it proved very useful in the protection of sql injections with the bui
 in methods for queries and inserts. In the login-server project we started out with, 
 there was a lot of raw SQL, which is what one should especially avoid to protect oneself
 against SQL-injections. The original project only used a dictionary as a database for
-the users, so we created messages and user tables in the database. Furthermore, the original
-project did not handle any of the common security exploits like CSRF, xxs and SQL injections. We will
-go into detail later on how we have mitigated the risks of such attacks.
-the users, so we created messages and user tables in the database. 
-The original project did not handle any of the common security exploits, and we will now discuss
-how we have implemented protection against these. 
+the users, so we created messages and user tables in the database.
 
+The original project did not handle any of the common security exploits like session managing, password handling, CSRF, and
+xss and SQL injections. We will now go into detail on how we have mitigated the risks of such attacks. After this
+we will answer the questions from 2B.
 
-#### Handling passwords
-We implemented password checking from the package password_strength, 
-and decided to only check the strength, and not uppercase and length 
-etc, because we know these requirements do not matter particularly, as
-length is the most important when it comes to password guessing and 
-brute force attacks. 
-We saw the recommendation of limiting the password strength requirement
-at 0.66, while testing we thought it was very strict and not very 
-user friendly, but simple passwords are one of the mayor contributors to
-security breaches, so our users will just have to come up with long passwords. 
-It is quite tiresome though, to come up with a password that works, so here is one
-that will pass: prcjdøGusbnr3klfud87.
-
-We use the generate_password_hash() from werkzeug.security to hash the
-passwords before they are stored in the database. This method both adds
-salt and hashes the password. We have manually checked that the password
-is not stored directly in the database, and that they are all different. 
 
 #### Login, Logout, and Sessions
 The FlaskLogin package provided us with some really useful tools for our application. We started out with
@@ -88,11 +69,43 @@ that it kept a secret, as it is crucial for securely signing the session cookie.
 it makes it easier to guess the session cookie value, and from there a lot of security breaches can happen. 
 More on session cookies in the cookie section below. 
 
+#### Cookie inspection
+Session cookies makes the user moving in between websites and still being logged in, and it also gives crucial security as it gives the single session-id that 
+that user can be and stay logged in with. They are generated and deleted within that "session", so they are not stored anywhere,
+which also makes them more secure. 
+Upon inspecting the cookies stored, we noticed that there was a check missing in the
+"Secure" column of the cookie attributes. If this attribute is checked, it means that the 
+cookie is only ever sent to the server over the HTTPS protocol. Flask has an easy way of 
+setting this attribute to true, so we did just that in __init__.py. This unfortunately led to 
+some bugs discovered when testing in safari, where it did not seem that the logout
+function from flask worked any longer. We therefore decided to leave it out. 
+We found from searching that there were differing opinions on exactly how secure the session cookie provided by
+flask really was. According to some, decrypting it was not at all that hard. To further secure
+our application, we set the login_manager.session_protection to "strong". This protects 
+the users from attacks involving stolen cookies, because the correct IP-address will be  
+attached to the cookie
+
+#### Handling passwords
+We implemented password checking from the package password_strength, 
+and decided to not worry about enforcing uppercase letters, digits, special characters,
+etc., as length is the most important attribute when it comes to password guessing and 
+brute force attacks. We saw the recommendation of limiting the password strength requirement
+at 0.66, while testing we thought it was very strict and not very 
+user friendly, but simple passwords are one of the mayor contributors to
+security breaches, so our users will just have to come up with long passwords. 
+It is quite tiresome though, to come up with a password that works, so here is one
+that will pass: prcjdøGusbnr3klfud87.
+
+We use the generate_password_hash() from werkzeug.security to hash the
+passwords before they are stored in the database. This method both adds
+salt and hashes the password. We have manually checked that the password
+is not stored directly in the database, and that they are all different. 
+
 #### CSRF - attack prevention
 In order to prevent CSRF attacks we enabled CSRF protection globally for our Flask app in __init__.py. 
 CSRF attacks are made possible because browser requests automatically include the session cookies, we
 therefore need to attach a CSRF token to our POST requests in our app. The reason why we need to add CSRF
-token to our POST methods is because this is a request that modifies the state on the server.
+tokens to our POST methods is because these are request that modifies the state on the server.
 Since CSRF tokens are random and unguessable strings we now have a way of validating the request origin, hence
 preventing malicious requests from the same browser by an attacker. 
 
@@ -100,6 +113,19 @@ We have attached csrf token to these requests (comment added in the code as well
 - When we are signing up a user in auth.py we are making a POST-request in signup.html
 - When we are logging in a user in auth.py we are making a POST-request in login.html 
 - When we are sending a message in sending.html we are making a POST-request
+
+#### Cross-Site Scripting Protection
+Flask automatically sets the httpOnly flag to true. According to Mozilla MDN Web Docs, 
+a cookie with the httpOnly attribute will only be sent to the server, and they are
+not accessible by Javascript's `document.cookie `API. One is not fully protected 
+against XSS attacks with this attribute, in fact, it kind of just lessens the impact
+if one were to be submitted to an attack. To actually prevent XSS attacks, one has to 
+filter and validate every input. We have used the Jinja templating language to render our HTML templates, meaning that 
+whenever a user requests something from our application (such as the login-, signup-, profile- or messaging-page) 
+Jinja will respond with an HTML template. Jinja will also automatically escape the HTML which is the primary means to protect
+us from xss attacks because we are strictly telling the browser that the data we are sending should be interpreted only as data. 
+When displaying the sent and received messages we are not rendering the page, we therefore need to add a countermeasure to 
+xss attacks here. We solved this by adding a simple HTML encoder in messaging.py in order to properly sanitize the user input.
 
 #### SQL Injection Protection
 As mentioned previously we decided to use SQLAlchemy to init our database for this app. SQLAlchemy provides 
@@ -117,36 +143,6 @@ it did warn about some technical issues we had no problems with. We decided not 
 into this, and hoped that what we read about SQLAlchemy's filter_by is enough to protect 
 our application. 
 
-#### Cross-Site Scripting Protection
-Flask automatically sets the httpOnly flag to true. According to Mozilla MDN Web Docs, 
-a cookie with the httpOnly attribute will only be sent to the server, and they are
-not accessible by Javascript's `document.cookie `API. One is not fully protected 
-against XSS attacks with this attribute, in fact, it kind of just lessens the impact
-if one were to be submitted to an attack. To actually prevent XSS attacks, one has to 
-filter and validate every input. We have used the Jinja templating language to render our HTML templates, meaning that 
-whenever a user requests something from our application (such as the login-, signup-, profile- or messaging-page) 
-Jinja will respond with an HTML template. Jinja will also automatically escape the HTML which is the primary means to protect
-us from xss attacks because we are strictly telling the browser that the data we are sending should be interpreted only as data. 
-When displaying the sent and received messages we are not rendering the page, we therefore need to add a countermeasure to 
-xss attacks here. We solved this by adding a simple HTML encoder in messaging.py in order to properly sanitize the user input.
-
-#### Cookie inspection
-Session cookies makes the user moving in between websites and still being logged in, and it also gives crucial security as it gives the single session-id that 
-that user can be and stay logged in with. They are generated and deleted within that "session", so they are not stored anywhere,
-which also makes them more secure. 
-Upon inspecting the cookies stored, we noticed that there was a check missing in the
-"Secure" column of the cookie attributes. If this attribute is checked, it means that the 
-cookie is only ever sent to the server over the HTTPS protocol. Flask has an easy way of 
-setting this attribute to true, so we did just that in __init__.py. This unfortunately led to 
-some bugs discovered when testing in safari, where it did not seem that the logout
-function from flask worked any longer. We therefore decided to leave it out. 
-We found from searching
-that there were differing opinions on exactly how secure the session cookie provided by
-flask really was. According to some, decrypting it was not at all that hard. To further secure
-our application, we set the login_manager.session_protection to "strong". This protects 
-the users from attacks involving stolen cookies, because the correct IP-address will be  
-attached to the cookie
-
 
 #### Testing 
 Testing is important to ensure that the application works as expected, and to validate that it is resistant to exploits.
@@ -160,37 +156,36 @@ with the filter function that accepts user input. All of the other queries do no
 - Try to create a new user that already exists -> fails as expected
 - Try to alter the cookie value for the session of the logged in user in the web 
 developer tool -> behaves as expected : when refreshing page the user is automatically logged out 
-- Tried to <script>alert(‘XSS’)</script>
 
 ### Answers to the questions
 
-#### Threat Model
+##### Threat Model
 The assets that we need to protect are the user credentials as well as the messages that the users have sent
-to each other as these can contain sensitive and private information. The threat agents are therefore
-people who have interests in gaining access to this information for a number of reasons. 
+to each other as these can contain sensitive and private information. The threat agents therefore
+have interests in gaining access to this information for a number of reasons. 
 If an attacker is successful in a password attack then confidentiality, authenticity, and availability would be compromised.
 Private messages would be made available, and the attacker could also impersonate as the user and send messages
-to others. The attacker being logged into the account would disable the actual user from accessing it. 
+to others. Furthermore, the attacker being logged into the account would disable the actual user from accessing it. 
 
 Phishing, brute-forcing, and dictionary attacks are some ways of retrieving a password, so how can we counter measure these?
 By enforcing the user to create a strong passwords with a good length we make it much harder for an attacker to 
 successfully brute-force the password, and to prevent dictionary attacks we can encrypt the password with salt in our database.
 
-It is, however, quite hard to protect against all phishing attacks during application development as this is a weakness on the users side.
-One phishing attack we can counter measure is CSRF, which happens when a user is tricked into clicking a link or loading page. 
-In CSRF the attacker gains access over the session cookie which contains authentication data and represents the user’s session, 
-which is exploited to impersonate the user to perform malicious actions. If we add CSRF tokens to the users requests we have a 
-way of validating the origin of the request which in order to mitigate these types of attacks. 
+It is, however, quite hard to protect against all phishing attacks during application development as a successful phishing attack
+often is a result of a weakness from the user. One phishing attack we can counter measure is CSRF, which happens when a user is tricked
+into clicking a link or loading page. In CSRF the attacker gains access over the session cookie which contains authentication data and
+represents the user’s session. This is exploited to impersonate the user to perform malicious actions. If we add CSRF tokens to the users requests we have a 
+way of validating the origin of the request which mitigates these types of attacks. 
 
 Injection attacks like xxs and sql injections could also result in compromised user credentials. These types of attacks
-pose a threat to not only confidentiality, but also integrity and availability as the data within the application could be 
+pose a threat to not only confidentiality, integrity and availability as the data within the application could be 
 changed in an unauthorized manner which could cause issues with the availability of the application. To prevent these types
-of attacks it is important to sanitize user input so that it cannot be interpreted as SQL queries or html tags. 
+of attacks it is important to sanitize user input so that it cannot be interpreted as SQL queries, html tags or css. 
 
 The limitations of the hacker depends heavily on the difficulty of the attack compared to how high the reward is. If our application
 were to be used as a mailing system in a successful business were the employees were to share sensitive and valuable information then the likelihood 
 of being exposed to attacks would most certainly increase. The limitations of what we can sensibly protect against follows the same rules. Questions like : should we
-spend a lot of resources on protecting something that has a low likelihood on being attacked? and, How big is the impact of that attack? Are important in order to
+spend a lot of resources on protecting something that has a low likelihood on being attacked?, and How big is the impact of that attack? Are important in order to
 determine what mitigations are within reason to perform. 
 
 ##### What are the main attack vectors for the application?
@@ -209,7 +204,6 @@ make the weaker parts of our application resilient enough. We have not been able
 to hack into our own system as much as we would have liked to, but the ways we have tried is
 described above. The next step in protecting against attacks would therefore definitely be 
 to set up a lot of tests to find every vulnerability our application has.
-
 
 ##### What is the access control model? 
 In order for a user to access the mailing system that user first needs to be authenticated. Once
