@@ -19,16 +19,14 @@ The original application had many flaws that needed improving. The first thing
 we wanted to improve was the structure. App.py was ill-structured, and had a lot 
 of different purposes. We started out with isolating the login-logout stuff, and
 followed a tutorial from this page: https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login
-We found that a lot of secure procedures came free with flask_login, and the tutorial 
+We found that a lot of secure procedures came free with FlaskLogin, and the tutorial 
 also included the hashing of password, and of course password checking, which lacked 
 in the original project. We decided to continue using SQLAlchemy, which the tutorial also
 used, and it proved very useful in the protection of sql injections with the built
-in methods for queries and inserts. It also serializes with JSON, which provides more security
-than for example Python's Pickle Module. In the login-server project we started out with, 
+in methods for queries and inserts. In the login-server project we started out with, 
 there was a lot of raw SQL, which is what one should especially avoid to protect oneself
 against SQL-injections. The original project only used a dictionary as a database for
 the users, so we created messages and user tables in the database. 
-
 The original project did not handle any of the common security exploits, and we will now discuss
 how we have implemented protection against these. 
 
@@ -127,11 +125,6 @@ flask really was. According to some, decrypting it was not at all that hard. To 
 our application, we set the login_manager.session_protection to "strong". This protects 
 the users from attacks involving stolen cookies, because the correct IP-address will be  
 attached to the cookie
-
-Using cookies for security opposed to access tokens is a conscious choice on our part. 
-Access tokens take more time to implement, and they have to be stored somewhere. They are
-immune to CSRF attacks, but we found that we would rather implement protection against the
-CSRF attacks, and go for cookies. 
 
 
 #### Testing 
