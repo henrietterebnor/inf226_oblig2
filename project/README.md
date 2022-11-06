@@ -1,8 +1,28 @@
 ## Report on assignment 2A and 2B
 #### By Henriette and Maria
-We thought the app.py to be a very messy file, and it seemed as quite a big task to refactor everything to a neat file with
-app.py as a starting point. We therefore decided to go for a different route, where we followed this tutorial to get
-started with a good form of authentication, the tutorial can be found here: https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login
+
+#### How to get started with our project
+After cloning you will have two directories, one named project, and one names auth. auth is our virtual 
+environment. You can try activating it, but if your IDE does not recognize it as such, just delete the auth directory and
+run these commands in the terminal inside the project inf226_oblig2:
+```
+python3 -m venv auth 
+source auth/bin/activate 
+export FLASK_APP=project`
+```
+Hopefully you don't run into too much trouble installing the different packages you will need. 
+Now this may be caused by some shortcomings on our part, but sometimes installing a package requires using
+pip3 but most of the time pip works. Sometimes it only works outside the virtual environment and sometimes
+it only works inside the virtual environment. 
+
+A last resort that has never failed (me) has been to go to
+Pycharm (in the toolbar) -> preferences -> Python Interpreter -> click the plus -> search up the package there.
+Remember that the _ in package names when importing them are replaced by - here. 
+(these are instructions for mac, I hope windows users have less problems.)
+
+The other directory, project, contains all the python and html for the project. To run the project, assuming you 
+have all the packages you need and that you have ran the three commands listed above, all you need to do is type
+flask run (hopefully)
 
 #### The functional aspect 
 We wanted our web application to function like an email. The logged in entity can send messages to
