@@ -147,10 +147,12 @@ our application.
 Testing is important to ensure that the application works as expected, and to validate that it is resistant to exploits.
 Optimally, we should have created unit and integration tests, but we instead did some manual tests to check that the 
 security measures that we have implemented works as expected. 
-- We created a user named B'; DROP TABLE messages'; -- which is a SQL injection that we tried on the old application. 
-After we created this user we tried to search for messages from this user to see if the injection would work now. We
-also tried sending messages to this user, and it did not hurt our database. These are the only two functions that use
-the SQLAlchemy functions with user input.
+- We created a user named B'; DROP TABLE messages'; -- which is a SQL injection that was successful in the search field 
+of the old application. The search function would be the most vulnerable to SQL injections, though it is possible in insert 
+statements as well. After we created this user we tried to search for messages from this user to see if the injection 
+would work now. We also tried sending messages to this user, and it did not hurt our database. These are the only two 
+functions that use the SQLAlchemy functions with user input. We also created a user named B, and wrote the same as above
+in the search field. Neither this hurt our database.
 - Try to create a new user with a weak password -> fails as expected
 - Try to create a new user that already exists -> fails as expected
 - Try to alter the cookie value for the session of the logged in user in the web 
