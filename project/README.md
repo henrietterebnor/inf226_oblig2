@@ -70,7 +70,7 @@ it makes it easier to guess the session cookie value, and from there a lot of se
 More on session cookies in the cookie section below. 
 
 #### Cookie inspection
-Session cookies makes the user moving in between websites and still being logged in, and it also gives crucial security as it gives the single session-id that 
+Session cookies makes it possible for a user to move in between websites and still be logged in, and it also gives crucial security as it gives the single session-id that 
 that user can be and stay logged in with. They are generated and deleted within that "session", so they are not stored anywhere,
 which also makes them more secure. 
 Upon inspecting the cookies stored, we noticed that there was a check missing in the
@@ -82,8 +82,7 @@ function from flask worked any longer. We therefore decided to leave it out.
 We found from searching that there were differing opinions on exactly how secure the session cookie provided by
 flask really was. According to some, decrypting it was not at all that hard. To further secure
 our application, we set the login_manager.session_protection to "strong". This protects 
-the users from attacks involving stolen cookies, because the correct IP-address will be  
-attached to the cookie
+the users from attacks involving stolen cookies, because the correct IP-address will be attached to the cookie
 
 #### Handling passwords
 We implemented password checking from the package password_strength, 
@@ -149,9 +148,9 @@ Testing is important to ensure that the application works as expected, and to va
 Optimally, we should have created unit and integration tests, but we instead did some manual tests to check that the 
 security measures that we have implemented works as expected. 
 - We created a user named B'; DROP TABLE messages'; -- which is a SQL injection that we tried on the old application. 
-After we created this user we tried to search for messages from this user to see if the injection would work now. It 
-was no longer successful. The reason why we tried this particularly for search for messages is because this queries the database
-with the filter function that accepts user input. All of the other queries do not use user input. 
+After we created this user we tried to search for messages from this user to see if the injection would work now. We
+also tried sending messages to this user, and it did not hurt our database. These are the only two functions that use
+the SQLAlchemy functions with user input.
 - Try to create a new user with a weak password -> fails as expected
 - Try to create a new user that already exists -> fails as expected
 - Try to alter the cookie value for the session of the logged in user in the web 
@@ -177,7 +176,7 @@ into clicking a link or loading page. In CSRF the attacker gains access over the
 represents the user’s session. This is exploited to impersonate the user to perform malicious actions. If we add CSRF tokens to the users requests we have a 
 way of validating the origin of the request which mitigates these types of attacks. 
 
-Injection attacks like xxs and sql injections could also result in compromised user credentials. These types of attacks
+Injection attacks like xss and sql injections could also result in compromised user credentials. These types of attacks
 pose a threat to not only confidentiality, integrity and availability as the data within the application could be 
 changed in an unauthorized manner which could cause issues with the availability of the application. To prevent these types
 of attacks it is important to sanitize user input so that it cannot be interpreted as SQL queries, html tags or css. 
